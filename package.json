@@ -13,6 +13,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "gh-pages": "^2.0.1"
+    "gh-pages": "^2.0.1",
+    "vuepress": "^1.0.0-rc.1"
+  },
+  "dependencies": {
+    "vuepress-theme-reco": "^1.0.1"
   }
 }

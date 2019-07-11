@@ -1,70 +1,25 @@
-'# Hello VuePress!' 
-
-bolog
-
-
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
-
-
-:tada: :100:
-
-::: tip
-This is a tip
-:::
-
-::: warning
-This is a warning
-:::
-
-::: danger
-This is a dangerous warning
-:::
-
-[[toc]]
-
-::: danger STOP
-Danger zone, do not proceed
-:::
-
-
-
-``` js
-export default {
-  data () {
-    return {
-      msg: 'Highlighted!'
-    }
-  }
+---
+home: true
+# heroImage: /reco/hero.png
+heroImageStyle: {
+  maxWidth: '600px',
+  width: '100%',
+  display: block,
+  margin: '9rem auto 2rem',
+  background: '#fff',
+  borderRadius: '50%',
 }
-```
-
-
-<<< @/foot
-
-
-
-{{ 1 + 1 }}
-
-
-<span v-for="i in 3">{{ i }} </span>
-
-::: v-pre
-`{{ This will be displayed as-is }}`
-:::
-
-{{ $page }}
-
-
-======================================
-
+# isShowTitleInHome: false
+# actionText: Go
+# actionLink: /views/other/guide
+# features:
+# - title: Yesterday
+#   details: 开发一款看着开心、写着顺手的 vuepress 博客主题
+# - title: Today
+#   details: 希望帮助更多的人花更多的时间在内容创作上，而不是博客搭建上
+# - title: Tomorrow
+#   details: 希望更多的爱好者能够参与进来，帮助这个主题更好的成长
 ---
-meta:
-  - name: description
-    content: hello
-  - name: keywords
-    content: super duper SEO
----
+
+
+<style> #app .logo{ display:none; } </style>
