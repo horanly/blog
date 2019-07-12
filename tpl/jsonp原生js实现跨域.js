@@ -13,4 +13,3 @@ document.head.appendChild(script)
 function handleCallback (res){
     console.log(res);
 }
-
