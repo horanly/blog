@@ -506,7 +506,386 @@ ES2016添加了两个小的特性来说明标准化过程：
 
 ### 1.Array.prototype.includes()
 
-includes() 函数用来判断一个数组是否包含一个指定的值，如果包含则返回 true，否则返回false。
+includes() 函数用来判断一个数组是否包含一个指定的值，如果包含则返回 true，否则返回false。   
+
+includes 函数与 indexOf 函数很相似，下面两个表达式是等价的：
+
+~~~ js
+arr.includes(x)
+arr.indexOf(x) >= 0
+~~~
+
+接下来我们来判断数字中是否包含某个元素：
+
+> 在ES7之前的做法
+
+使用indexOf()验证数组中是否存在某个元素，这时需要根据返回值是否为-1来判断：
+
+~~~ js
+let arr = ['react', 'angular', 'vue'];
+
+if (arr.indexOf('react') !== -1)
+{
+    console.log('react存在');
+}
+~~~
+
+> 使用ES7的includes()
+
+使用includes()验证数组中是否存在某个元素，这样更加直观简单：
+
+~~~ js
+let arr = ['react', 'angular', 'vue'];
+
+if (arr.includes('react'))
+{
+    console.log('react存在');
+}
+~~~
+
+### 2.指数操作符
+
+在ES7中引入了指数运算符**，**具有与Math.pow(..)等效的计算结果。
+
+> 不使用指数操作符
+
+使用自定义的递归函数calculateExponent或者Math.pow()进行指数运算：
+
+~~~ js
+function calculateExponent(base, exponent)
+{
+    if (exponent === 1)
+    {
+        return base;
+    }
+    else
+    {
+        return base * calculateExponent(base, exponent - 1);
+    }
+}
+
+console.log(calculateExponent(2, 10)); // 输出1024
+console.log(Math.pow(2, 10)); // 输出1024
+~~~
+
+> 使用指数操作符
+
+使用指数运算符**，就像+、-等操作符一样：
+
+~~~ js
+console.log(2**10);// 输出1024
+~~~
+
+## ES8新特性（2017）
+
+- async/await
+- Object.values()
+- Object.entries()
+- String padding: padStart()和padEnd()，填充字符串达到当前长度
+- 函数参数列表结尾允许逗号
+- Object.getOwnPropertyDescriptors()
+- ShareArrayBuffer和Atomics对象，用于从共享内存位置读取和写入
+
+### 1.async/await
+
+在ES8中加入了对async/await的支持，也就我们所说的异步函数，这是一个很实用的功能。 async/await将我们从头痛的回调地狱中解脱出来了，使整个代码看起来很简洁
+
+> 使用async/await与不使用async/await的差别：
+
+<<< @/tpl/EcmaScript/es6-async-await.js
+
+
+#### async/await的几种应用场景
+
+> 获取异步函数的返回值
+
+异步函数本身会返回一个Promise，所以我们可以通过then来获取异步函数的返回值。
+
+~~~ js
+async function charCountAdd(data1, data2){
+    const d1 = await charCount(data1);
+    const d2 = await charCount(data2);
+    return d1 + d2
+}
+charCountAdd('Hello','Hi').then(console.log);//通过then获取异步函数的返回值。
+function charCount(data) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(data.length);
+        }, 1000);
+    });
+}
+~~~
+
+> async/await在并发场景中的应用
+
+对于上述的例子，我们调用await两次，每次都是等待1秒一共是2秒，效率比较低，而且两次await的调用并没有依赖关系，那能不能让其并发执行呢，答案是可以的，接下来我们通过Promise.all来实现await的并发调用
+
+~~~ js
+saync function chartCountAdd(data1, data2) {
+    const [d1, d2] = await Promise.all([charCount(data1),charCount(data2)])
+    return d1 + d2
+}
+charCountAdd('Hello','Hi').then(console.log);
+function charCount(data) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(data.length);
+        }, 1000);
+    });
+}
+~~~
+
+通过上述代码我们实现了两次charCount的并发调用，Promise.all接受的是一个数组，它可以将数组中的promise对象并发执行；
+
+> async/await的几种错误处理方式
+
+**第一种：捕捉整个async/await函数的错误**
+
+~~~ js
+async function charCountAdd(data1, data2) {
+    const d1=await charCount(data1);
+    const d2=await charCount(data2);
+    return d1+d2;
+}
+charCountAdd('Hello','Hi')
+    .then(console.log)
+    .catch(console.log);//捕捉整个async/await函数的错误
+
+function charCount(data) {
+    ...
+}
+~~~
+
+这种方式可以捕捉整个charCountAdd运行过程中出现的错误，错误可能是由charCountAdd本身产生的，也可能是由对data1的计算中或data2的计算中产生的。
+
+**第二种：捕捉单个的await表达式的错误**
+
+~~~ js
+async function charCountAdd(data1, data2) {
+    const d1 = await chartCount(data1)
+        .catch(e=>console.log('e'))
+    const d2 = await chartCount(data2)
+        .catch(e=>console.log('e'))
+
+    return d1+d2
+}
+charCountAdd('Hello','Hi').then(console.log);
+function charCount(data) {
+    ...
+}
+~~~
+
+通过这种方式可以捕捉每一个await表达式的错误，如果既要捕捉每一个await表达式的错误，又要捕捉整个charCountAdd函数的错误，可以在调用charCountAdd的时候加个catch。
+
+~~~ js
+...
+charCountAdd('Hello','Hi')
+    .then(console.log)
+    .catch(console.log); //捕捉整个async/await函数的错误
+...
+~~~
+
+**第三种：同时捕捉多个的await表达式的错误**
+
+~~~ js
+async function charCountAdd(data1, data2) {
+    let d1,d2;
+    try {
+        d1=await charCount(data1);
+        d2=await charCount(data2);
+    }catch (e){
+        console.log('e');
+    }
+    return d1+d2;
+}
+charCountAdd('Hello','Hi')
+    .then(console.log);
+
+function charCount(data) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(data.length);
+        }, 1000);
+    });
+}
+~~~
+
+### 2.Object.entries()
+
+Object.entries()函数返回一个给定对象自身可枚举属性的键值对的数组。    
+
+~~~ js
+// 假设我们要遍历如下对象obj的所有值
+const obj = {a: 1, b: 2, c: 3};
+~~~
+
+> 不使用Object.entries() :ES7
+
+~~~ js
+Object.keys(obj).forEach(key=>{
+	console.log('key:'+key+' value:'+obj[key]);
+})
+//key:a value:1
+//key:b value:2
+//key:c value:3
+~~~
+
+
+> 使用Object.entries() :ES8
+
+~~~ js
+for(let [key,value] of Object.entries(obj1)){
+	console.log(`key: ${key} value:${value}`)
+}
+//key:a value:1
+//key:b value:2
+//key:c value:3
+~~~
+
+### 3.Object.values()
+
+Object.values()是一个与Object.keys()类似的新函数，但返回的是Object自身属性的所有值，不包括继承的值。
+
+> 不使用Object.values() :ES7
+
+~~~ js
+const vals=Object.keys(obj).map(key=>obj[key]);
+console.log(vals);//[1, 2, 3]
+~~~
+
+> 使用Object.values() :ES8
+
+~~~ js
+const values=Object.values(obj);
+console.log(values); //[1, 2, 3]
+~~~
+
+从上述代码中可以看出Object.values()为我们省去了遍历key，并根据这些key获取value的步骤。
+
+
+### 4.String padding
+
+在ES8中String新增了两个实例函数String.prototype.padStart和String.prototype.padEnd，允许将空字符串或其他字符串添加到原始字符串的开头或结尾。
+
+> String.padStart(targetLength,[padString])
+
+- targetLength:当前字符串需要填充到目标长度。如果这个数值小于当前字符串的长度，则返回当前字符串本身。
+- padString:(可选)填充字符串。如果字符串太长，使填充后的字符串长度超过了目标长度，则只保留最左侧的部分，其他部分会被截断，此参数的缺省值为 " "。
+
+~~~ js
+console.log('0.0'.padStart(4,'10')) //10.0
+console.log('0.0'.padStart(20))// 0.00    
+~~~
+
+> String.padEnd(targetLength,padString])
+
+- targetLength:当前字符串需要填充到的目标长度。如果这个数值小于当前字符串的长度，则返回当前字符串本身。
+- padString:(可选) 填充字符串。如果字符串太长，使填充后的字符串长度超过了目标长度，则只保留最左侧的部分，其他部分会被截断，此参数的缺省值为 " "；
+
+~~~ js
+console.log('0.0'.padEnd(4,'0')) //0.00    
+console.log('0.0'.padEnd(10,'0'))//0.00000000
+~~~
+
+
+### 5.函数参数列表结尾允许逗号
+
+主要作用是方便使用git进行多人协作开发时修改同一个函数减少不必要的行变更。
+
+> 不使用ES8
+
+
+~~~ js
+//程序员A
+var f = function(a,
+  b
+   ) { 
+  ...
+  }
+
+//程序员B
+var f = function(a,
+  b,   //变更行
+  c   //变更行
+   ) { 
+  ...
+  }
+
+//程序员C
+var f = function(a,
+  b,
+  c,   //变更行
+  d   //变更行
+   ) { 
+  ...
+  }
+~~~
+
+> 使用ES8
+
+~~~ js
+//程序员A
+var f = function(a,
+  b,
+   ) { 
+  ...
+  }
+
+//程序员B
+var f = function(a,
+  b,
+  c,   //变更行
+   ) { 
+  ...
+  }
+
+//程序员C
+var f = function(a,
+  b,
+  c,
+  d,   //变更行
+   ) { 
+  ...
+  }
+~~~
+
+### 6.Object.getOwnPropertyDescriptors()
+
+Object.getOwnPropertyDescriptors()函数用来获取一个对象的所有自身属性的描述符,如果没有任何自身属性，则返回空对象。
+
+> 函数原型：
+
+~~~ js
+Object.getOwnPropertyDescriptors(obj)
+~~~
+
+返回obj对象的所有自身属性的描述符，如果没有任何自身属性，则返回空对象。
+
+~~~ js
+const obj2 = {
+	name: 'Jine',
+	get age() { return '18' }
+};
+Object.getOwnPropertyDescriptors(obj2)
+// {
+//   age: {
+//     configurable: true,
+//     enumerable: true,
+//     get: function age(){}, //the getter function
+//     set: undefined
+//   },
+//   name: {
+//     configurable: true,
+//     enumerable: true,
+//		value:"Jine",
+//		writable:true
+//   }
+// }
+~~~
+
+
+
 
 
 
