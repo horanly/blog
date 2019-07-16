@@ -493,7 +493,7 @@ console.log(a); // 输出10
   let a = 10;
 }
 
-console.log(a); // ReferenceError: aaaa is not defined
+console.log(a); // ReferenceError: a is not defined
 ~~~
 
 
@@ -503,3 +503,10 @@ ES2016添加了两个小的特性来说明标准化过程：
 
 - 数组includes()方法，用来判断一个数组是否包含一个指定的值，根据情况，如果包含则返回true，否则返回false。
 - a ** b指数运算符，它与 Math.pow(a, b)相同。
+
+### 1.Array.prototype.includes()
+
+includes() 函数用来判断一个数组是否包含一个指定的值，如果包含则返回 true，否则返回false。
+
+
+
