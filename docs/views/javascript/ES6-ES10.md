@@ -1,6 +1,6 @@
 --- 
 title: ES6、ES7、ES8、ES9、ES10新特性 
-date: 2019-07-15
+date: 2019-07-18
 categories: 
  - Javascript
 tags: 
@@ -884,8 +884,458 @@ Object.getOwnPropertyDescriptors(obj2)
 // }
 ~~~
 
+## ES9新特性（2018）
+
+- 异步迭代
+- Promise.finally()
+- Rest/Spread 属性
+- 正则表达式命名捕获组（Regular Expression Named Capture Groups）
+- 正则表达式反向断言（lookbehind）
+- 正则表达式dotAll模式
+- 正则表达式 Unicode 转义
+- 非转义序列的模板字符串
 
 
+### 1.异步迭代
+
+在async/await的某些时刻，你可能尝试在同步循环中调用异步函数。      
+
+例如：
+
+~~~ js
+// 错误的写法
+async function process(array) {
+  for (let i of array) {
+    await doSomething(i);
+  }
+}
+~~~
+
+~~~ js
+// 错误的写法
+async function process(array) {
+  array.forEach(async i => {
+    await doSomething(i);
+  });
+}
+~~~
+
+ES2018引入异步迭代器（asynchronous iterators），这就像常规迭代器，除了next()方法返回一个Promise。因此await可以和for...of循环一起使用，以串行的方式运行异步操作。例如：
+
+~~~ js
+// 正确的写法
+async function process(array) {
+  for await (let i of array) {
+    doSomething(i);
+  }
+}
+~~~
+
+### 2.Promise.finally()
+
+一个Promise调用链要么成功到达最后一个.then()，要么失败触发.catch()。在某些情况下，你想要在无论Promise运行成功还是失败，运行相同的代码，例如清除，删除对话，关闭数据库连接等。      
+
+.finally()允许你指定最终的逻辑：
 
 
+~~~ js
+function doSomething() {
+  doSomething1()
+  .then(doSomething2)
+  .then(doSomething3)
+  .catch(err => {
+    console.log(err);
+  })
+  .finally(() => {
+    // finish here!
+  });
+}
+~~~
+
+### 3.Rest/Spread 属性
+
+ES2015引入了Rest参数和扩展运算符。三个点（...）仅用于数组。Rest参数语法允许我们将一个不定数量的参数表示为一个数组。
+
+~~~ js
+restParam(1, 2, 3, 4, 5);
+
+function restParam(p1, p2, ...p3) {
+  // p1 = 1
+  // p2 = 2
+  // p3 = [3, 4, 5]
+}
+~~~
+
+
+展开操作符以相反的方式工作，将数组转换成可传递给函数的单独参数。例如Math.max()返回给定数字中的最大值：
+
+~~~ js
+const values = [99, 100, -1, 48, 16];
+console.log( Math.max(...value))
+~~~
+
+ES2018为对象解构提供了和数组一样的Rest参数（）和展开操作符，一个简单的例子：
+
+
+~~~ js
+const myObject = {
+  a: 1,
+  b: 2,
+  c: 3
+};
+
+const { a, ...x } = myObject;
+// a = 1
+// x = { b: 2, c: 3 }
+~~~
+
+或者你可以使用它给函数传递参数：
+
+~~~ js
+restParam({
+  a: 1,
+  b: 2,
+  c: 3
+});
+
+function restParam({ a, ...x }) {
+  // a = 1
+  // x = { b: 2, c: 3 }
+}
+~~~
+
+跟数组一样，Rest参数只能在声明的结尾处使用。此外，它只适用于每个对象的顶层，如果对象中嵌套对象则无法适用。      
+
+扩展运算符可以在其他对象内使用，例如：    
+
+~~~ js
+const obj1 = { a: 1, b: 2, c: 3 };
+const obj2 = { ...obj1, z: 26 };
+// obj2 is { a: 1, b: 2, c: 3, z: 26 }
+~~~
+
+可以使用扩展运算符拷贝一个对象，像是这样obj2 = {...obj1}，但是 这只是一个对象的浅拷贝。另外，如果一个对象A的属性是对象B，那么在克隆后的对象cloneB中，该属性指向对象B。
+
+### 4.正则表达式命名捕获组
+
+JavaScript正则表达式可以返回一个匹配的对象——一个包含匹配字符串的类数组，例如：以YYYY-MM-DD的格式解析日期：
+
+~~~ js
+const
+  reDate = /([0-9]{4})-([0-9]{2})-([0-9]{2})/,
+  match  = reDate.exec('2018-04-30'),
+  year   = match[1], // 2018
+  month  = match[2], // 04
+  day    = match[3]; // 30
+~~~
+
+这样的代码很难读懂，并且改变正则表达式的结构有可能改变匹配对象的索引。      
+
+
+ES2018允许命名捕获组使用符号?\<name\>，在打开捕获括号(后立即命名，示例如下：
+
+~~~ js
+const
+  reDate = /(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})/,
+  match  = reDate.exec('2018-04-30'),
+  year   = match.groups.year,  // 2018
+  month  = match.groups.month, // 04
+  day    = match.groups.day;   // 30
+~~~
+
+任何匹配失败的命名组都将返回undefined。    
+
+
+命名捕获也可以使用在replace()方法中。例如将日期转换为美国的 MM-DD-YYYY 格式：
+
+~~~ js
+const
+  reDate = /(?<year>[0-9]{4})-(?<month>[0-9]{2})-(?<day>[0-9]{2})/,
+  d      = '2018-04-30',
+  usDate = d.replace(reDate, '$<month>-$<day>-$<year>');
+~~~
+
+
+### 5.正则表达式反向断言
+
+目前JavaScript在正则表达式中支持先行断言（lookahead）。这意味着匹配会发生，但不会有任何捕获，并且断言没有包含在整个匹配字段中。例如从价格中捕获货币符号：
+
+~~~ js
+const
+  reLookahead = /\D(?=\d+)/,
+  match       = reLookahead.exec('$123.89');
+
+console.log( match[0] ); // $
+~~~
+
+ES2018引入以相同方式工作但是匹配前面的反向断言（lookbehind），这样我就可以忽略货币符号，单纯的捕获价格的数字：
+
+~~~ js
+const
+  reLookbehind = /(?<=\D)\d+/,
+  match        = reLookbehind.exec('$123.89');
+
+console.log( match[0] ); // 123.89
+~~~
+
+以上是 肯定反向断言，非数字\D必须存在。同样的，还存在 否定反向断言，表示一个值必须不存在，例如
+
+~~~ js
+const
+  reLookbehindNeg = /(?<!\D)\d+/,
+  match           = reLookbehind.exec('$123.89');
+
+console.log( match[0] ); // null
+~~~
+
+
+### 6.正则表达式dotAll模式
+
+正则表达式中点.匹配除回车外的任何单字符，标记s改变这种行为，允许行终止符的出现，例如：
+
+~~~ js
+/hello.world/.test('hello\nworld');  // false
+/hello.world/s.test('hello\nworld'); // true
+~~~
+
+### 7.正则表达式 Unicode 转义
+
+到目前为止，在正则表达式中本地访问 Unicode 字符属性是不被允许的。ES2018添加了 Unicode 属性转义——形式为\p{...}和\P{...}，在正则表达式中使用标记 u (unicode) 设置，在\p块儿内，可以以键值对的方式设置需要匹配的属性而非具体内容。例如：
+
+~~~ js
+const reGreekSymbol = /\p{Script=Greek}/u;
+reGreekSymbol.test('π'); // true
+~~~
+
+此特性可以避免使用特定 Unicode 区间来进行内容类型判断，提升可读性和可维护性。
+
+
+### 8.非转义序列的模板字符串
+
+之前，\u开始一个 unicode 转义，\x开始一个十六进制转义，\后跟一个数字开始一个八进制转义。这使得创建特定的字符串变得不可能，例如Windows文件路径 C:\uuu\xxx\111
+
+
+## ES10新特性（2019）
+
+- 更加友好的 JSON.stringify
+- 新增了Array的flat()方法和flatMap()方法
+- 新增了String的trimStart()方法和trimEnd()方法
+- Object.fromEntries()
+- Symbol.prototype.description
+- String.prototype.matchAll
+- Function.prototype.toString()现在返回精确字符，包括空格和注释
+- 简化try {} catch {},修改 catch 绑定
+- 新的基本数据类型BigInt
+- globalThis
+- import()
+- Legacy RegEx
+- 私有的实例方法和访问器
+
+
+### 2.更加友好的 JSON.stringify
+
+如果输入 Unicode 格式但是超出范围的字符，在原先JSON.stringify返回格式错误的Unicode字符串。现在实现了一个改变JSON.stringify的第3阶段提案，因此它为其输出转义序列，使其成为有效Unicode（并以UTF-8表示）
+
+
+### 3.新增了Array的flat()方法和flatMap()方法
+
+flat()和flatMap()本质上就是是归纳（reduce） 与 合并（concat）的操作。
+
+#### **Array.prototype.flat()**
+
+flat() 方法会按照一个可指定的深度递归遍历数组，并将所有元素与遍历到的子数组中的元素合并为一个新数组返回。
+
+- flat()方法最基本的作用就是数组降维
+
+~~~ js
+var arr1 = [1, 2, [3, 4]];
+arr1.flat(); 
+// [1, 2, 3, 4]
+
+var arr2 = [1, 2, [3, 4, [5, 6]]];
+arr2.flat();
+// [1, 2, 3, 4, [5, 6]]
+
+var arr3 = [1, 2, [3, 4, [5, 6]]];
+arr3.flat(2);
+// [1, 2, 3, 4, 5, 6]
+
+//使用 Infinity 作为深度，展开任意深度的嵌套数组
+arr3.flat(Infinity); 
+// [1, 2, 3, 4, 5, 6]
+~~~
+
+- 其次，还可以利用flat()方法的特性来去除数组的空项
+
+~~~ js
+var arr4 = [1, 2, , 4, 5];
+arr4.flat();
+// [1, 2, 4, 5]
+~~~
+
+#### **Array.prototype.flatMap()**
+
+flatMap() 方法首先使用映射函数映射每个元素，然后将结果压缩成一个新数组。它与 map 和 深度值1的 flat 几乎相同，但 flatMap 通常在合并成一种方法的效率稍微高一些。 这里我们拿map方法与flatMap方法做一个比较。
+
+~~~ js
+var arr1 = [1, 2, 3, 4];
+
+arr1.map(x => [x * 2]);
+// [[2], [4], [6], [8]]
+
+arr1.flatMap(x => [x * 2]);
+// [2, 4, 6, 8]
+
+// 只会将 flatMap 中的函数返回的数组 “压平” 一层
+arr1.flatMap(x => [[x * 2]]);
+// [[2], [4], [6], [8]]
+~~~
+
+
+### 4.新增了String的trimStart()方法和trimEnd()方法
+
+新增的这两个方法很好理解，分别去除字符串首尾空白字符，这里就不用例子说声明了。
+
+
+### 5.Object.fromEntries()
+
+Object.entries()方法的作用是返回一个给定对象自身可枚举属性的键值对数组，其排列与使用 for...in 循环遍历该对象时返回的顺序一致（区别在于 for-in 循环也枚举原型链中的属性）。    
+
+
+而Object.fromEntries() 则是 Object.entries() 的反转。      
+
+
+Object.fromEntries() 函数传入一个键值对的列表，并返回一个带有这些键值对的新对象。这个迭代参数应该是一个能够实现@iterator方法的的对象，返回一个迭代器对象。它生成一个具有两个元素的类似数组的对象，第一个元素是将用作属性键的值，第二个元素是与该属性键关联的值
+
+
+- 通过 Object.fromEntries， 可以将 Map 转化为 Object:
+
+~~~ js
+const map = new Map([ ['foo', 'bar'], ['baz', 42] ]);
+const obj = Object.fromEntries(map);
+console.log(obj); // { foo: "bar", baz: 42 }
+~~~
+
+- 通过 Object.fromEntries， 可以将 Array 转化为 Object:
+
+~~~ js
+const arr = [ ['0', 'a'], ['1', 'b'], ['2', 'c'] ];
+const obj = Object.fromEntries(arr);
+console.log(obj); // { 0: "a", 1: "b", 2: "c" }
+~~~
+
+
+### 6.Symbol.prototype.description
+
+通过工厂函数Symbol（）创建符号时，您可以选择通过参数提供字符串作为描述：
+
+~~~ js
+const sym = Symbol('The description');
+~~~
+
+以前，访问描述的唯一方法是将符号转换为字符串：
+
+~~~ js
+assert.equal(String(sym), 'Symbol(The description)');
+~~~
+
+现在引入了getter Symbol.prototype.description以直接访问描述：
+
+~~~ js
+assert.equal(sym.description, 'The description');
+~~~
+
+### 7.String.prototype.matchAll
+
+matchAll() 方法返回一个包含所有匹配正则表达式及分组捕获结果的迭代器。 在 matchAll 出现之前，通过在循环中调用regexp.exec来获取所有匹配项信息（regexp需使用/g标志：
+
+
+~~~ js
+const regexp = RegExp('foo*','g');
+const str = 'table football, foosball';
+
+while ((matches = regexp.exec(str)) !== null) {
+  console.log(`Found ${matches[0]}. Next starts at ${regexp.lastIndex}.`);
+  // expected output: "Found foo. Next starts at 9."
+  // expected output: "Found foo. Next starts at 19."
+}
+~~~
+
+如果使用matchAll ，就可以不必使用while循环加exec方式（且正则表达式需使用／g标志）。使用matchAll 会得到一个迭代器的返回值，配合 for...of, array spread, or Array.from() 可以更方便实现功能：
+
+~~~ js
+const regexp = RegExp('foo*','g'); 
+const str = 'table football, foosball';
+let matches = str.matchAll(regexp);
+
+for (const match of matches) {
+  console.log(match);
+}
+// Array [ "foo" ]
+// Array [ "foo" ]
+
+// matches iterator is exhausted after the for..of iteration
+// Call matchAll again to create a new iterator
+matches = str.matchAll(regexp);
+
+Array.from(matches, m => m[0]);
+// Array [ "foo", "foo" ]
+~~~
+
+
+**matchAll可以更好的用于分组**
+
+~~~ js
+var regexp = /t(e)(st(\d?))/g;
+var str = 'test1test2';
+
+str.match(regexp); 
+// Array ['test1', 'test2']
+~~~
+
+~~~ js
+let array = [...str.matchAll(regexp)];
+
+array[0];
+// ['test1', 'e', 'st1', '1', index: 0, input: 'test1test2', length: 4]
+array[1];
+// ['test2', 'e', 'st2', '2', index: 5, input: 'test1test2', length: 4]
+~~~
+
+### 8.Function.prototype.toString()现在返回精确字符，包括空格和注释
+
+~~~ js
+function /* comment */ foo /* another comment */() {}
+
+// 之前不会打印注释部分
+console.log(foo.toString()); // function foo(){}
+
+// ES2019 会把注释一同打印
+console.log(foo.toString()); // function /* comment */ foo /* another comment */ (){}
+
+// 箭头函数
+const bar /* comment */ = /* another comment */ () => {};
+
+console.log(bar.toString()); // () => {}
+~~~
+
+### 9.修改 catch 绑定
+
+在 ES10 之前，我们必须通过语法为 catch 子句绑定异常变量，无论是否有必要。很多时候 catch 块是多余的。 ES10 提案使我们能够简单的把变量省略掉。
+
+> 之前是
+
+~~~ js
+try {} catch(e) {}
+~~~
+
+> 现在是
+
+~~~ js
+try {} catch {}
+~~~
+
+### 10.新的基本数据类型BigInt
+
+现在的基本数据类型（值类型）不止5种（ES6之后是六种）了哦！加上BigInt一共有七种基本数据类型，分别是： String、Number、Boolean、Null、Undefined、Symbol、BigInt
 
