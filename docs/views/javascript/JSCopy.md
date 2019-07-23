@@ -291,3 +291,4 @@ console.log(obj1.b.f === obj2.b.f);
 ## 总结
 
 ![Zvgvp4.png](https://s2.ax1x.com/2019/07/19/Zvgvp4.png)
+
