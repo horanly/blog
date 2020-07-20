@@ -1,7 +1,7 @@
 module.exports = {
   title: '前端知识收藏',
   description: 'If you don’t build YOUR dream, someone will hire you to build THEIRS!',
-  dest: './dist',
+  // dest: './dist',
   base: '/blog/',  // base路径
   head: [
     ['link', { rel: 'icon', href: '/images/favicon.ico' }],
