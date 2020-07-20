@@ -1,7 +1,7 @@
 module.exports = {
   title: '前端知识收藏',
   description: 'If you don’t build YOUR dream, someone will hire you to build THEIRS!',
-  // dest: './dist',
+  dest: './dist',
   base: '/blog/',  // base路径
   head: [
     ['link', { rel: 'icon', href: '/images/favicon.ico' }],
@@ -48,8 +48,8 @@ module.exports = {
           link: 'https://www.horan.top/adminifdoo/',
           icon: 'reco-category'
         },
-        { text: 'javascript-basics', link: 'http://www.horan.top/javascript-basics/', icon: 'reco-juejin' },
-        { text: 'jQuery 1.3 API', link: 'https://www.horan.top/jquery-handbook/', icon: 'reco-juejin' },
+        { text: 'javascript-basics', link: 'http://www.horan.top/javascript-basics/', icon: 'reco-blog' },
+        { text: 'jQuery 1.3 API', link: 'https://www.horan.top/jquery-handbook/', icon: 'reco-api' },
       ]
     },
     {
