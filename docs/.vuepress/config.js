@@ -22,34 +22,52 @@ module.exports = {
       icon: 'reco-home'
     },
    
-    {
-      text: '杂谈',
-      link: '/say/',
-      icon: 'reco-account'
-    },
-    
+    // {
+    //   text: '杂谈',
+    //   link: '/say/',
+    //   icon: 'reco-account'
+    // },
+
     {
       text: '时间线',
       link: '/timeLine/',
       icon: 'reco-date'
     },
+    // {
+    //   text: '语雀',
+    //   link: 'https://www.yuque.com/yuque/blog',
+    //   icon: 'reco-twitter'
+    // },
+
     {
-      text: '语雀',
-      link: 'https://www.yuque.com/yuque/blog',
-      icon: 'reco-twitter'
+      text: '我的作品',
+      icon: 'reco-coding',
+      items: [
+        {
+          text: 'AdminLTE',
+          link: 'https://www.horan.top/adminifdoo/',
+          icon: 'reco-category'
+        },
+        { text: 'javascript-basics', link: 'http://www.horan.top/javascript-basics/', icon: 'reco-juejin' },
+        { text: 'jQuery 1.3 API', link: 'https://www.horan.top/jquery-handbook/', icon: 'reco-juejin' },
+      ]
     },
     {
-      text: '关于我',
+      text: '联系我',
       icon: 'reco-message',
       items: [
+        {
+          text: '语雀',
+          link: 'https://www.yuque.com/yuque/blog',
+          icon: 'reco-twitter'
+        },
         {
           text: 'GitHub',
           link: 'https://github.com/horanly/my_blog',
           icon: 'reco-github'
         },
         { text: '博客圆', link: 'https://www.cnblogs.com/horanly/', icon: 'reco-bokeyuan' },
-        { text: '关于我', link: '/about/', icon: 'reco-account' },
-        // { text: 'WeChat', link: 'https://mp.weixin.qq.com/s/mXFqeUTegdvPliXknAAG_A', icon: 'reco-wechat' },
+        { text: '关于我', link: '/about/', icon: 'reco-account' }
       ]
     },
     ],
